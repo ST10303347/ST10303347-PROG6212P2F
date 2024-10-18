@@ -1,46 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ST10303347_PROG6212P2F.Data;
 using ST10303347_PROG6212P2F.Models;
+using ST10303347_PROG6212P2F.Services;
+
+using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace ST10303347_PROG6212P2F.Controllers
 {
     public class ClaimsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IClaimService _claimService;
+        private readonly ICommentsService _commentService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ClaimsController(ApplicationDbContext context)
+        public ClaimsController(IClaimService claimService, ICommentsService commentService, IWebHostEnvironment webHostEnvironment)
         {
-            _context = context;
+            _claimService = claimService;
+            _commentService = commentService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Claims
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.claims.Include(c => c.User);
-            return View(await applicationDbContext.ToListAsync());
+            var claims = _claimService.GetAll();
+            return View(await claims.ToListAsync());
         }
 
         // GET: Claims/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var claim = await _context.claims
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var claim = await _claimService.GetById(id);
             if (claim == null)
-            {
                 return NotFound();
-            }
 
             return View(claim);
         }
@@ -48,117 +45,54 @@ namespace ST10303347_PROG6212P2F.Controllers
         // GET: Claims/Create
         public IActionResult Create()
         {
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
         // POST: Claims/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,IdentityUserId,HoursWorked,HourRate,Total,Status")] Claim claim)
+        public async Task<IActionResult> Create(ClaimVM claimVM)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(claim);
-                await _context.SaveChangesAsync();
+                string? filePath = null;
+
+                if (claimVM.SupportingDocument != null)
+                {
+                    string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "Documents");
+                    string fileName = claimVM.SupportingDocument.FileName;
+                    filePath = Path.Combine(uploadDir, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await claimVM.SupportingDocument.CopyToAsync(stream);
+                    }
+                }
+
+                var claim = new Claim
+                {
+                    HoursWorked = claimVM.HoursWorked,
+                    HourRate = claimVM.HourRate,
+                    Total = claimVM.HoursWorked * claimVM.HourRate,
+                    IdentityUserId = claimVM.IdentityUserId,
+                    Status = claimVM.Status
+                };
+
+                await _claimService.Add(claim);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", claim.IdentityUserId);
-            return View(claim);
+            return View(claimVM);
         }
 
-        // GET: Claims/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var claim = await _context.claims.FindAsync(id);
-            if (claim == null)
-            {
-                return NotFound();
-            }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", claim.IdentityUserId);
-            return View(claim);
-        }
-
-        // POST: Claims/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,IdentityUserId,HoursWorked,HourRate,Total,Status")] Claim claim)
+        public async Task<IActionResult> AddComment([Bind("Id, ActualComment, ClaimId, IdentityUserId")] Comment comment)
         {
-            if (id != claim.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(claim);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ClaimExists(claim.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", claim.IdentityUserId);
-            return View(claim);
-        }
-
-        // GET: Claims/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
+                await _commentService.Add(comment);
             }
 
-            var claim = await _context.claims
-                .Include(c => c.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (claim == null)
-            {
-                return NotFound();
-            }
-
-            return View(claim);
-        }
-
-        // POST: Claims/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var claim = await _context.claims.FindAsync(id);
-            if (claim != null)
-            {
-                _context.claims.Remove(claim);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ClaimExists(int id)
-        {
-            return _context.claims.Any(e => e.Id == id);
+            var claim = await _claimService.GetById(comment.ClaimId);
+            return View("Details", claim);
         }
     }
 }
