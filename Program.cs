@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ST10303347_PROG6212P2F.Data;
+using ST10303347_PROG6212P2F.ENUMS;
 
 namespace ST10303347_PROG6212P2F
 {
@@ -51,9 +52,8 @@ namespace ST10303347_PROG6212P2F
             {
                 var services = scope.ServiceProvider;
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                string[] roles = { "Lecturer", "ProgrammeCoordinator", "AcademicManager" };
 
-                foreach (var role in roles)
+                foreach (var role in Enum.GetNames(typeof(Role)))
                 {
                     if (!await roleManager.RoleExistsAsync(role))
                     {
