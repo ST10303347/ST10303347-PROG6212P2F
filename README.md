@@ -51,3 +51,5 @@ Logout when done. Create a new user with coordinator or manager role and you wil
 I am using an Azure database so you do not need to create a database. 
 If you need to have a look at the database in appsettings.json there is the logins and password
 Please note my LOGIN was not configured properly so you will not be able to login to a profile you already created. The tests data and files have been provided
+
+The project has more than 10 commits and ykimvc has been added as collaborator
