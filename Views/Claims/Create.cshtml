@@ -37,9 +37,9 @@
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label" for="SupportingDocument">Supporting Document:</label>
+                <label class="col-sm-4 col-form-label" for="SupportingDocument">Supporting Document (Optional):</label>
                 <div class="col-sm-8">
-                    <input asp-for="SupportingDocument" class="form-control" type="file" accept=".pdf, .doc, .docx" required />
+                    <input asp-for="SupportingDocument" class="form-control" type="file" />
                     <span asp-validation-for="SupportingDocument" class="text-danger"></span>
                 </div>
             </div>

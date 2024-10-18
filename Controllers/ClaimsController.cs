@@ -43,12 +43,6 @@ namespace ST10303347_PROG6212P2F.Controllers
         }
 
         // GET: Claims/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Claims/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ClaimVM claimVM)
@@ -57,11 +51,18 @@ namespace ST10303347_PROG6212P2F.Controllers
             {
                 string? filePath = null;
 
-                if (claimVM.SupportingDocument != null)
+                if (claimVM.SupportingDocument != null && claimVM.SupportingDocument.Length > 0)
                 {
+                    if (claimVM.SupportingDocument.Length > 5 * 1024 * 1024) // Check if file size exceeds 5MB
+                    {
+                        ModelState.AddModelError("SupportingDocument", "File size must be less than 5MB.");
+                        return View(claimVM);
+                    }
+
                     string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "Documents");
-                    string fileName = claimVM.SupportingDocument.FileName;
+                    string fileName = Path.GetFileName(claimVM.SupportingDocument.FileName);
                     filePath = Path.Combine(uploadDir, fileName);
+
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await claimVM.SupportingDocument.CopyToAsync(stream);
@@ -80,8 +81,10 @@ namespace ST10303347_PROG6212P2F.Controllers
                 await _claimService.Add(claim);
                 return RedirectToAction(nameof(Index));
             }
+
             return View(claimVM);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddComment([Bind("Id, ActualComment, ClaimId, IdentityUserId")] Comment comment)
