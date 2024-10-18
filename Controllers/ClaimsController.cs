@@ -128,6 +128,31 @@ namespace ST10303347_PROG6212P2F.Controllers
             var claim = await _claimService.GetById(comment.ClaimId);
             return View("Details", claim);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var claim = await _claimService.GetById(id);
+            if (claim == null) return NotFound();
+
+            claim.Status = ST10303347_PROG6212P2F.ENUMS.Status.Approved;
+            await _claimService.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var claim = await _claimService.GetById(id);
+            if (claim == null) return NotFound();
+
+            claim.Status = ST10303347_PROG6212P2F.ENUMS.Status.Rejected;
+            await _claimService.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }
 
