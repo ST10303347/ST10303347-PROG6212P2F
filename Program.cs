@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ST10303347_PROG6212P2F.Data;
+using ST10303347_PROG6212P2F.Data.Services;
 using ST10303347_PROG6212P2F.ENUMS;
+using ST10303347_PROG6212P2F.Services;
 
 namespace ST10303347_PROG6212P2F
 {
@@ -22,6 +24,8 @@ namespace ST10303347_PROG6212P2F
                 options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddScoped<IClaimService, ClaimService>();
+            builder.Services.AddScoped<ICommentsService, CommentsService>();
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
