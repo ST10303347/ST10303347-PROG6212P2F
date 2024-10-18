@@ -24,8 +24,9 @@ public class ClaimVM
     [ForeignKey("IdentityUserId")]
     public IdentityUser? User { get; set; }
 
-    [Required(ErrorMessage = "Please attach a supporting document.")]
-    [FileExtensions(Extensions = "pdf,doc,docx", ErrorMessage = "Only PDF and Word documents are allowed.")]
+
+    [FileExtensions(Extensions = "pdf,doc,docx,txt,rtf,xlsx,csv,ppt,pptx",
+     ErrorMessage = "Only document files are allowed.")]
     public IFormFile? SupportingDocument { get; set; }
 
     public Status Status { get; set; }

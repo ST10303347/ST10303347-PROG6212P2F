@@ -2,10 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using ST10303347_PROG6212P2F.Models;
 using ST10303347_PROG6212P2F.Services;
-
-using System.Threading.Tasks;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using ST10303347_PROG6212P2F.ENUMS;
+using Claim = ST10303347_PROG6212P2F.Models.Claim;
 
 namespace ST10303347_PROG6212P2F.Controllers
 {
@@ -15,18 +17,36 @@ namespace ST10303347_PROG6212P2F.Controllers
         private readonly ICommentsService _commentService;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ClaimsController(IClaimService claimService, ICommentsService commentService, IWebHostEnvironment webHostEnvironment)
+        public ClaimsController(
+            IClaimService claimService,
+            ICommentsService commentService,
+            IWebHostEnvironment webHostEnvironment)
         {
             _claimService = claimService;
             _commentService = commentService;
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // GET: Claims
+        // GET: Claims (All Claims)
         public async Task<IActionResult> Index()
         {
             var claims = _claimService.GetAll();
             return View(await claims.ToListAsync());
+        }
+
+        // GET: Claims/PendingClaims (Pending Claims for coordinators/managers)
+        public async Task<IActionResult> PendingClaims()
+        {
+            var pendingClaims = _claimService.GetPendingClaims();
+            return View(await pendingClaims.ToListAsync());
+        }
+
+        // GET: Claims/MyClaims (Claims for the current lecturer)
+        public async Task<IActionResult> MyClaims()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var myClaims = _claimService.GetMyClaims(userId);
+            return View(await myClaims.ToListAsync());
         }
 
         // GET: Claims/Details/5
@@ -43,6 +63,12 @@ namespace ST10303347_PROG6212P2F.Controllers
         }
 
         // GET: Claims/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Claims/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ClaimVM claimVM)
@@ -53,13 +79,18 @@ namespace ST10303347_PROG6212P2F.Controllers
 
                 if (claimVM.SupportingDocument != null && claimVM.SupportingDocument.Length > 0)
                 {
-                    if (claimVM.SupportingDocument.Length > 5 * 1024 * 1024) // Check if file size exceeds 5MB
+                    if (claimVM.SupportingDocument.Length > 5 * 1024 * 1024)
                     {
                         ModelState.AddModelError("SupportingDocument", "File size must be less than 5MB.");
                         return View(claimVM);
                     }
 
                     string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "Documents");
+                    if (!Directory.Exists(uploadDir))
+                    {
+                        Directory.CreateDirectory(uploadDir);
+                    }
+
                     string fileName = Path.GetFileName(claimVM.SupportingDocument.FileName);
                     filePath = Path.Combine(uploadDir, fileName);
 
@@ -73,19 +104,19 @@ namespace ST10303347_PROG6212P2F.Controllers
                 {
                     HoursWorked = claimVM.HoursWorked,
                     HourRate = claimVM.HourRate,
-                    Total = claimVM.HoursWorked * claimVM.HourRate,
+                    Total = claimVM.Total,
                     IdentityUserId = claimVM.IdentityUserId,
-                    Status = claimVM.Status
+                    Status = Status.Pending // Default to Pending on creation
                 };
 
                 await _claimService.Add(claim);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(MyClaims));
             }
 
             return View(claimVM);
         }
 
-
+        // POST: Claims/AddComment
         [HttpPost]
         public async Task<IActionResult> AddComment([Bind("Id, ActualComment, ClaimId, IdentityUserId")] Comment comment)
         {
@@ -99,3 +130,4 @@ namespace ST10303347_PROG6212P2F.Controllers
         }
     }
 }
+

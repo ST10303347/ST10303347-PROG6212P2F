@@ -10,6 +10,10 @@ namespace ST10303347_PROG6212P2F.Data
             : base(options)
         {
         }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.LogTo(Console.WriteLine);  
+        }
 
         public DbSet<Claim> claims { get; set; }
         public DbSet<Comment> comments { get; set; }
