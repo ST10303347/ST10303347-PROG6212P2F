@@ -48,4 +48,6 @@ Wait for the project to build and launch in your web browser.
 ABOUT THE PROJECT - Once you have opened the website please register and select the role Lectuerer to. This will have its own set of navigation links differnt to that of other roles.
 Logout when done. Create a new user with coordinator or manager role and you will see a new set of navigation links. now youll have more functionality, can add comments reject or approve claims as well as view all claims
 
+I am using an Azure database so you do not need to create a database. 
+If you need to have a look at the database in appsettings.json there is the logins and password
 Please note my LOGIN was not configured properly so you will not be able to login to a profile you already created. The tests data and files have been provided
