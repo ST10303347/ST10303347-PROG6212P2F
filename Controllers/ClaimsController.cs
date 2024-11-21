@@ -188,8 +188,43 @@ namespace ST10303347_PROG6212P2F.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> MassAction(string filterType, string name, double? minPay, double? maxPay, double? minHours, double? maxHours, string action)
+        public async Task<IActionResult> MassAction(
+    string filterType,
+    string name,
+    double? minPay,
+    double? maxPay,
+    double? minHours,
+    double? maxHours,
+    string action)
         {
+            // Validate input
+            if (filterType == "criteria")
+            {
+                if ((minPay < 0 || maxPay < 0 || minHours < 0 || maxHours < 0))
+                {
+                    TempData["Error"] = "Pay and Hours cannot have negative values.";
+                    return RedirectToAction("PendingClaims");
+                }
+
+                if (maxPay == 0 || maxHours == 0)
+                {
+                    TempData["Error"] = "Maximum Pay and Hours cannot be 0.";
+                    return RedirectToAction("PendingClaims");
+                }
+
+                if (minPay > maxPay)
+                {
+                    TempData["Error"] = "Minimum Pay cannot be greater than Maximum Pay.";
+                    return RedirectToAction("PendingClaims");
+                }
+
+                if (minHours > maxHours)
+                {
+                    TempData["Error"] = "Minimum Hours cannot be greater than Maximum Hours.";
+                    return RedirectToAction("PendingClaims");
+                }
+            }
+
             var claims = await _claimService.GetAll().ToListAsync();
 
             if (filterType == "name" && !string.IsNullOrEmpty(name))
@@ -198,11 +233,14 @@ namespace ST10303347_PROG6212P2F.Controllers
             }
             else if (filterType == "criteria")
             {
+                minPay ??= 0; 
+                minHours ??= 0; // Default to 0 if not provided for both
+
                 claims = claims.Where(c =>
-                    c.HourRate >= minPay &&
-                    c.HourRate <= maxPay &&
-                    c.HoursWorked >= minHours &&
-                    c.HoursWorked <= maxHours
+                    (minPay == 0 || c.HourRate >= minPay) &&
+                    (maxPay == null || c.HourRate <= maxPay) &&
+                    (minHours == 0 || c.HoursWorked >= minHours) &&
+                    (maxHours == null || c.HoursWorked <= maxHours)
                 ).ToList();
             }
 
@@ -221,10 +259,12 @@ namespace ST10303347_PROG6212P2F.Controllers
                 }
             }
 
-            await _claimService.SaveChangesAsync(); 
+            await _claimService.SaveChangesAsync();
             TempData["Success"] = $"{claims.Count} claims have been {action}d.";
             return RedirectToAction("PendingClaims");
         }
+
+
 
 
 
