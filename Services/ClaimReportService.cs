@@ -53,39 +53,6 @@ namespace ST10303347_PROG6212P2F.Services
             }
         }
 
-        public async Task<byte[]> GenerateBulkClaimReportAsync(List<Claim> claims)
-        {
-            var reportDocument = new ReportDocument();
-            reportDocument.Load(Path.Combine(_webHostEnvironment.WebRootPath, "Reports", "BulkClaimReport.rpt"));
-
-            var claimsTable = new DataTable();
-            claimsTable.Columns.Add("Id", typeof(int));
-            claimsTable.Columns.Add("HoursWorked", typeof(double));
-            claimsTable.Columns.Add("HourRate", typeof(double));
-            claimsTable.Columns.Add("Total", typeof(double));
-            claimsTable.Columns.Add("Status", typeof(string));
-
-            foreach (var claim in claims)
-            {
-                claimsTable.Rows.Add(
-                    claim.Id,
-                    claim.HoursWorked,
-                    claim.HourRate,
-                    claim.Total,
-                    claim.Status.ToString()
-                );
-            }
-
-            reportDocument.SetDataSource(claimsTable);
-
-            using (var reportStream = reportDocument.ExportToStream(ExportFormatType.PortableDocFormat))
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    reportStream.CopyTo(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-        }
+        
     }
 }

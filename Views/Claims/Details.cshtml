@@ -23,7 +23,13 @@
             <dt class="col-sm-4">Status</dt>
             <dd class="col-sm-8">@Model.Status</dd>
         </dl>
-
+        <div class="action-buttons">
+            <a asp-action="GenerateClaimReport"
+               asp-route-id="@Model.Id"
+               class="btn btn-primary">
+                Generate Claim Report
+            </a>
+        </div>
         <div class="mt-4">
             <h4 class="text-center" style="color: purple;">Comments</h4>
 

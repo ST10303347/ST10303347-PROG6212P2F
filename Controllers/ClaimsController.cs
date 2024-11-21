@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using ST10303347_PROG6212P2F.ENUMS;
 using Claim = ST10303347_PROG6212P2F.Models.Claim;
+using NSubstitute.Exceptions;
 
 namespace ST10303347_PROG6212P2F.Controllers
 {
@@ -162,8 +163,27 @@ namespace ST10303347_PROG6212P2F.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+       
+        
+        
+        [HttpGet]
+        public async Task<IActionResult> GenerateClaimReport(int id)
+        {
+            try
+            {
+                var reportBytes = await _claimReportService.GenerateClaimReportAsync(id);
+                return File(reportBytes, "application/pdf", $"Claim_{id}_Report.pdf");
+            }
+            catch (ArgumentNotFoundException)
+            {
+                return NotFound();
+            }
+        }
 
-
+      
+      
     }
+
 }
+
 
