@@ -9,7 +9,7 @@ namespace ST10303347_PROG6212P2F.Services
         IQueryable<Claim> GetMyClaims(string userId); 
         IQueryable<Claim> GetPendingClaims(); 
         Task<Claim> GetById(int? id);
-        Task SaveChanges();
+        Task SaveChangesAsync();
 
 
 

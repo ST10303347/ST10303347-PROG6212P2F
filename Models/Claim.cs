@@ -8,6 +8,11 @@ namespace ST10303347_PROG6212P2F.Models
 {
     public class Claim
     {
+        public Claim()
+        {
+            Comments = new List<Comment>();
+            SupportingDocuments = new List<SupportingDocument>();
+        }
         public int Id { get; set; }
 
         [Required]

@@ -20,9 +20,10 @@ namespace ST10303347_PROG6212P2F
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Logging.AddConsole();
+            builder.Services.AddRazorPages();
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-                options.SignIn.RequireConfirmedAccount = true)
+                options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddScoped<IClaimService, ClaimService>();

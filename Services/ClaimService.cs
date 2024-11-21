@@ -18,7 +18,7 @@ namespace ST10303347_PROG6212P2F.Data.Services
 
         public async Task Add(Claim claim)
         {
-            _context.claims.Add(claim); // Ensure correct DbSet name
+            _context.claims.Add(claim); 
             await _context.SaveChangesAsync();
         }
 
@@ -57,7 +57,7 @@ namespace ST10303347_PROG6212P2F.Data.Services
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task SaveChanges()
+        public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }

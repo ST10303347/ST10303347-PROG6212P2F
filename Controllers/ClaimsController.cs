@@ -76,22 +76,17 @@ namespace ST10303347_PROG6212P2F.Controllers
             if (ModelState.IsValid)
             {
                 string? filePath = null;
+                string? fileName = null;
 
-                if (claimVM.SupportingDocument != null && claimVM.SupportingDocument.Length > 0)
+                if (claimVM.SupportingDocument != null)
                 {
-                    if (claimVM.SupportingDocument.Length > 5 * 1024 * 1024)
-                    {
-                        ModelState.AddModelError("SupportingDocument", "File size must be less than 5MB.");
-                        return View(claimVM);
-                    }
-
                     string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "Documents");
                     if (!Directory.Exists(uploadDir))
                     {
                         Directory.CreateDirectory(uploadDir);
                     }
 
-                    string fileName = Path.GetFileName(claimVM.SupportingDocument.FileName);
+                    fileName = Path.GetFileName(claimVM.SupportingDocument.FileName);
                     filePath = Path.Combine(uploadDir, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
@@ -105,16 +100,28 @@ namespace ST10303347_PROG6212P2F.Controllers
                     HoursWorked = claimVM.HoursWorked,
                     HourRate = claimVM.HourRate,
                     Total = claimVM.Total,
-                    IdentityUserId = claimVM.IdentityUserId,
-                    Status = Status.Pending // Default to Pending on creation
+                    IdentityUserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    Status = Status.Pending,
+                    Comments = new List<Comment>(), // Initialize empty list
+                    SupportingDocuments = fileName != null
+                        ? new List<SupportingDocument>
+                        {
+                    new SupportingDocument
+                    {
+                        FileName = fileName,
+                        FilePath = filePath
+                    }
+                        }
+                        : null
                 };
 
                 await _claimService.Add(claim);
-                return RedirectToAction(nameof(MyClaims));
+                return RedirectToAction("MyClaims", "Claims");
             }
 
             return View(claimVM);
         }
+
 
         // POST: Claims/AddComment
         [HttpPost]
@@ -135,8 +142,8 @@ namespace ST10303347_PROG6212P2F.Controllers
             var claim = await _claimService.GetById(id);
             if (claim == null) return NotFound();
 
-            claim.Status = ST10303347_PROG6212P2F.ENUMS.Status.Approved;
-            await _claimService.SaveChanges();
+            claim.Status = Status.Approved;
+            await _claimService.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -147,8 +154,8 @@ namespace ST10303347_PROG6212P2F.Controllers
             var claim = await _claimService.GetById(id);
             if (claim == null) return NotFound();
 
-            claim.Status = ST10303347_PROG6212P2F.ENUMS.Status.Rejected;
-            await _claimService.SaveChanges();
+            claim.Status = Status.Rejected;
+            await _claimService.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
