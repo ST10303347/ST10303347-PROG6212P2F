@@ -163,25 +163,32 @@ namespace ST10303347_PROG6212P2F.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-       
-        
-        
-        [HttpGet]
-        public async Task<IActionResult> GenerateClaimReport(int id)
+
+
+
+        public async Task<IActionResult> GenerateClaimReport(int claimId)
         {
             try
             {
-                var reportBytes = await _claimReportService.GenerateClaimReportAsync(id);
-                return File(reportBytes, "application/pdf", $"Claim_{id}_Report.pdf");
+                var reportBytes = await _claimReportService.GenerateClaimReportAsync(claimId);
+                var fileName = $"ClaimReport_{claimId}.pdf";
+
+                return File(reportBytes, "application/pdf", fileName);
             }
-            catch (ArgumentNotFoundException)
+            catch (ArgumentException ex)
             {
-                return NotFound();
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("ErrorPage"); 
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An unexpected error occurred.";
+                return RedirectToAction("ErrorPage"); 
             }
         }
 
-      
-      
+
+
     }
 
 }
