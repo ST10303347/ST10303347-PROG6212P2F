@@ -187,6 +187,46 @@ namespace ST10303347_PROG6212P2F.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> MassAction(string filterType, string name, double? minPay, double? maxPay, double? minHours, double? maxHours, string action)
+        {
+            var claims = await _claimService.GetAll().ToListAsync();
+
+            if (filterType == "name" && !string.IsNullOrEmpty(name))
+            {
+                claims = claims.Where(c => c.IdentityUserId.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else if (filterType == "criteria")
+            {
+                claims = claims.Where(c =>
+                    c.HourRate >= minPay &&
+                    c.HourRate <= maxPay &&
+                    c.HoursWorked >= minHours &&
+                    c.HoursWorked <= maxHours
+                ).ToList();
+            }
+
+            if (action == "approve")
+            {
+                foreach (var claim in claims)
+                {
+                    claim.Status = Status.Approved;
+                }
+            }
+            else if (action == "reject")
+            {
+                foreach (var claim in claims)
+                {
+                    claim.Status = Status.Rejected;
+                }
+            }
+
+            await _claimService.SaveChangesAsync(); 
+            TempData["Success"] = $"{claims.Count} claims have been {action}d.";
+            return RedirectToAction("PendingClaims");
+        }
+
+
 
 
     }

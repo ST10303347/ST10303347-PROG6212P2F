@@ -1,28 +1,23 @@
 ﻿@model IEnumerable<ST10303347_PROG6212P2F.Models.Claim>
 
-@{
-    ViewData["Title"] = "Pending Claims";
-}
+<div class="container mt-3">
+    <h2 class="text-center text-purple">Pending Claims</h2>
 
-<div class="container mt-5">
-    <h2 class="text-center" style="color: purple;">Pending Claims</h2>
+   
+    <div class="text-end mb-3">
+        <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#massActionModal">Mass Accept/Reject</button>
+    </div>
 
-    @if (!Model.Any())
-    {
-        <p class="text-center mt-4">There are no pending claims at the moment.</p>
-    }
-    else
-    {
-        <table class="table table-bordered table-hover mt-4">
-            <thead class="table-dark">
+   
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="bg-purple text-white">
                 <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Lecturer</th>
-                    <th scope="col">Hours Worked</th>
-                    <th scope="col">Hourly Rate</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Actions</th>
+                    <th>Claim ID</th>
+                    <th>Name</th>
+                    <th>Hours Worked</th>
+                    <th>Pay Per Hour</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,34 +25,126 @@
                 {
                     <tr>
                         <td>@claim.Id</td>
-                        <td>@claim.User</td>
+                        <td>@claim.IdentityUserId</td>
                         <td>@claim.HoursWorked</td>
-                        <td>@claim.HourRate.ToString("C")</td>
-                        <td>@claim.Total.ToString("C")</td>
-                        <td>@claim.Status</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@claim.Id"
-                               class="btn btn-sm btn-info">Details</a>
-
-                            <form method="post" asp-action="Approve" asp-route-id="@claim.Id"
-                                  style="display:inline;">
-                                <button type="submit"
-                                        class="btn btn-sm btn-primary me-2">
-                                    Approve
-                                </button>
-                            </form>
-
-                            <form method="post" asp-action="Reject" asp-route-id="@claim.Id"
-                                  style="display:inline;">
-                                <button type="submit"
-                                        class="btn btn-sm btn-dark">
-                                    Reject
-                                </button>
-                            </form>
-                        </td>
+                        <td>@claim.HourRate</td>
+                        <td class="text-warning">Pending</td>
                     </tr>
                 }
             </tbody>
         </table>
-    }
+    </div>
 </div>
+
+
+<div class="modal fade" id="massActionModal" tabindex="-1" aria-labelledby="massActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white">
+                <h5 class="modal-title" id="massActionModalLabel">Mass Accept/Reject Claims</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="massActionForm" method="post" action="@Url.Action("MassAction", "Claim")">
+                    <div class="mb-3">
+                        <label class="form-label">Filter By:</label>
+                        <div>
+                            <input type="radio" id="byName" name="filterType" value="name" checked>
+                            <label for="byName">By Name</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="byCriteria" name="filterType" value="criteria">
+                            <label for="byCriteria">By Criteria</label>
+                        </div>
+                    </div>
+
+                    
+                    <div id="nameFilter" class="mb-3">
+                        <label for="nameInput" class="form-label">Enter Name:</label>
+                        <input type="text" id="nameInput" name="name" class="form-control">
+                    </div>
+
+                    
+                    <div id="criteriaFilter" class="mb-3" style="display: none;">
+                        <label class="form-label">Per Hour Pay Range:</label>
+                        <div class="d-flex">
+                            <input type="number" name="minPay" placeholder="Min Pay" class="form-control me-2">
+                            <input type="number" name="maxPay" placeholder="Max Pay" class="form-control">
+                        </div>
+                        <label class="form-label mt-3">Work Hours Range:</label>
+                        <div class="d-flex">
+                            <input type="number" name="minHours" placeholder="Min Hours" class="form-control me-2">
+                            <input type="number" name="maxHours" placeholder="Max Hours" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .text-purple {
+        color: #6a1b9a;
+    }
+
+    .btn-purple {
+        background-color: #6a1b9a;
+        color: white;
+        border: none;
+    }
+
+        .btn-purple:hover {
+            background-color: #8e24aa;
+        }
+
+    .bg-purple {
+        background-color: #6a1b9a;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f8f5fa;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #eee;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+</style>
+
+<!-- This is to toggle inbetween filters -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const byNameRadio = document.getElementById("byName");
+        const byCriteriaRadio = document.getElementById("byCriteria");
+        const nameFilter = document.getElementById("nameFilter");
+        const criteriaFilter = document.getElementById("criteriaFilter");
+
+        byNameRadio.addEventListener("change", function () {
+            if (this.checked) {
+                nameFilter.style.display = "block";
+                criteriaFilter.style.display = "none";
+            }
+        });
+
+        byCriteriaRadio.addEventListener("change", function () {
+            if (this.checked) {
+                nameFilter.style.display = "none";
+                criteriaFilter.style.display = "block";
+            }
+        });
+    });
+</script>
