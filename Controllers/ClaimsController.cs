@@ -16,15 +16,18 @@ namespace ST10303347_PROG6212P2F.Controllers
         private readonly IClaimService _claimService;
         private readonly ICommentsService _commentService;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IClaimReportService _claimReportService;
 
         public ClaimsController(
             IClaimService claimService,
             ICommentsService commentService,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IClaimReportService claimReportService)
         {
             _claimService = claimService;
             _commentService = commentService;
             _webHostEnvironment = webHostEnvironment;
+            _claimReportService = claimReportService;
         }
 
         // GET: Claims (All Claims)
@@ -159,6 +162,7 @@ namespace ST10303347_PROG6212P2F.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
     }
 }
