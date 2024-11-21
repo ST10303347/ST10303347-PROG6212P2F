@@ -165,7 +165,7 @@ namespace ST10303347_PROG6212P2F.Controllers
         }
 
 
-
+        [HttpGet]
         public async Task<IActionResult> GenerateClaimReport(int claimId)
         {
             try

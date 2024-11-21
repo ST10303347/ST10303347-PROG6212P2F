@@ -24,9 +24,7 @@
             <dd class="col-sm-8">@Model.Status</dd>
         </dl>
         <div class="action-buttons">
-            <a asp-action="GenerateClaimReport"
-               asp-route-id="@Model.Id"
-               class="btn btn-primary">
+            <a asp-action="GenerateClaimReport" asp-controller="Claims" class="btn btn-primary">
                 Generate Claim Report
             </a>
         </div>
