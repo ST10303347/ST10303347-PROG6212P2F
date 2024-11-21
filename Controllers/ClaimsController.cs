@@ -267,9 +267,72 @@ namespace ST10303347_PROG6212P2F.Controllers
 
 
 
-        public IActionResult Edit()
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            return View();
+            var claim = await _claimService.GetById(id);
+            if (claim == null)
+                return NotFound();
+
+            var claimVM = new ClaimVM
+            {
+                Id = claim.Id,
+                HoursWorked = claim.HoursWorked,
+                HourRate = claim.HourRate
+            };
+
+            return View(claimVM);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ClaimVM claimVM)
+        {
+            if (id != claimVM.Id)
+                return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var claim = await _claimService.GetById(id);
+                if (claim == null)
+                    return NotFound();
+
+              
+                claim.HoursWorked = claimVM.HoursWorked;
+                claim.HourRate = claimVM.HourRate;
+                claim.Total = claimVM.Total;
+
+               
+                if (claimVM.SupportingDocument != null)
+                {
+                    string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "Documents");
+                    Directory.CreateDirectory(uploadDir);
+
+                    var fileName = Path.GetFileName(claimVM.SupportingDocument.FileName);
+                    var filePath = Path.Combine(uploadDir, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await claimVM.SupportingDocument.CopyToAsync(stream);
+                    }
+
+               
+                    claim.SupportingDocuments?.Clear();
+                    claim.SupportingDocuments = new List<SupportingDocument>
+            {
+                new SupportingDocument
+                {
+                    FileName = fileName,
+                    FilePath = filePath
+                }
+            };
+                }
+
+                await _claimService.SaveChangesAsync();
+                return RedirectToAction("PendingClaims");
+            }
+
+            return View(claimVM);
         }
 
     }

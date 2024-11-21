@@ -18,6 +18,7 @@
                     <th>Hours Worked</th>
                     <th>Pay Per Hour</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,10 +26,20 @@
                 {
                     <tr>
                         <td>@claim.Id</td>
-                        <td>@claim.IdentityUserId</td>
+                        <td>@claim.User</td>
                         <td>@claim.HoursWorked</td>
                         <td>@claim.HourRate</td>
                         <td class="text-warning">Pending</td>
+                        <td>
+                           
+                                <form method="post" asp-action="Approve" asp-route-id="@claim.Id" style="display:inline;">
+                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                </form>
+                                <form method="post" asp-action="Reject" asp-route-id="@claim.Id" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                          
+                        </td>
                     </tr>
                 }
             </tbody>
