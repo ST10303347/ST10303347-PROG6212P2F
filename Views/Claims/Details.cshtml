@@ -23,11 +23,22 @@
             <dt class="col-sm-4">Status</dt>
             <dd class="col-sm-8">@Model.Status</dd>
         </dl>
-        <div class="action-buttons">
-            <a asp-action="GenerateClaimReport" asp-controller="Claims" class="btn btn-primary">
+
+        <div class="action-buttons mb-4">
+            <a asp-action="GenerateClaimReport" asp-controller="Claims" asp-route-claimId="@Model.Id" class="btn btn-primary">
                 Generate Claim Report
             </a>
         </div>
+
+        @if (User.IsInRole("ProgrammeCoordinator") || User.IsInRole("AcademicManager"))
+        {
+            <div class="text-center mb-4">
+                <a asp-action="Edit" asp-controller="Claims" asp-route-id="@Model.Id" class="btn btn-warning w-100">
+                    Update Claim
+                </a>
+            </div>
+        }
+
         <div class="mt-4">
             <h4 class="text-center" style="color: purple;">Comments</h4>
 

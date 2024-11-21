@@ -267,7 +267,10 @@ namespace ST10303347_PROG6212P2F.Controllers
 
 
 
-
+        public IActionResult Edit()
+        {
+            return View();
+        }
 
     }
 
