@@ -29,6 +29,7 @@ namespace ST10303347_PROG6212P2F
             builder.Services.AddScoped<IClaimService, ClaimService>();
             builder.Services.AddScoped<ICommentsService, CommentsService>();
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<IClaimReportService, ClaimReportService>();
 
             var app = builder.Build();
 

@@ -21,7 +21,7 @@
                     <th scope="col">Hourly Rate</th>
                     <th scope="col">Total</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Actions</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -33,9 +33,7 @@
                         <td>@claim.HourRate.ToString("C")</td>
                         <td>@claim.Total.ToString("C")</td>
                         <td>@claim.Status</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@claim.Id" class="btn btn-sm btn-info">Details</a>
-                        </td>
+                      
                     </tr>
                 }
             </tbody>
